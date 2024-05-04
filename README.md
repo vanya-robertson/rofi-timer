@@ -24,14 +24,14 @@ Work in progress
 - if this process is completed, the top line in the file is deleted, and a new one is created for the new top one
 - if rofi-timers.csv is empty, no process is created
 
-# Potential addition
+# Potential additions
 
 - create line for xinitrc to start counting down top line.
 
 # Dependencies
 
-rofi (rofi) 
-date (coreutils)
-mpv (mpv)
-dunstify (dunst)
-dunst (dunst)
+rofi (rofi)  
+date (coreutils)  
+mpv (mpv)  
+dunstify (dunst)  
+dunst (dunst)  
