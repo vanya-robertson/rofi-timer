@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+# script that takes in HH:MM:SS, or MM:SS, or SS and converts to SS
+
+# inputformat correction: 
+
+import re
+from sys import argv
+
+time = argv[1]
+modified_time = re.sub(':', ' ', time)
+
+hourpattern = '^[0-9]+:[0-9][0-9]:[0-9][0-9]$'
+minutepattern = '^[0-9]+:[0-9][0-9]$'
+secondpattern = '^[0-9]+$'
+
+hourtest = re.match(hourpattern, time)
+minutetest = re.match(minutepattern, time)
+secondtest = re.match(secondpattern, time)
+
+try:
+    if hourtest:
+        hours, minutes, seconds = modified_time.split()
+        print(3600 * int(hours) + 60 * int(minutes) + int(seconds))
+    elif minutetest:
+        minutes, seconds = modified_time.split()
+        print( 60 * int(minutes) + int(seconds))
+    elif secondtest:
+        seconds = modified_time
+        print(int(seconds))
+except ValueError:
+    raise ValueError("Your input must be in one of the formats 'HH:MM:SS', 'MM:SS' or 'SS'")
