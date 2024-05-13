@@ -16,7 +16,7 @@ Work in progress
 - the countdowns will be obvious because they will be counting down, refreshing every second
 
 - upon triggering an alarm
-    + a sound (batman.opus) will be played
+    + a sound will be played
     + a notification will be sent with title "\<Alarm/Timer\> complete" "\<message for notification\>"
 
 - upon exiting the rofi menu, rofi-timers.csv will be sorted by "UNIX timestamp of date due"
@@ -32,6 +32,7 @@ Work in progress
 
 rofi (rofi)  
 date (coreutils)  
+sponge (moreutils)
 mpv (mpv)  
 dunstify (dunst)  
 dunst (dunst)  
