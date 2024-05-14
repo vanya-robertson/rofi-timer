@@ -45,7 +45,7 @@ if echo "$first_output" | grep -qe '^Alarm' -e '^Timer' ; then
   text_as_variable=$(echo "$first_output" | tr -d '[:punct:]' | tr ' ' '_')
   # echo "text_as_variable is $text_as_variable"
   timer_id="$(eval echo "\$$text_as_variable")"
-  echo "timer_id is $timer_id"
+#  echo "timer_id is $timer_id"
   corresponding_line_number="$(sed -n "/$timer_id/{=;q;}" "$csv_file")"
 #  echo "corresponding_line_number is $corresponding_line_number"
   second_output=$(rofi -dmenu -l 0)
@@ -61,31 +61,33 @@ if echo "$first_output" | grep -qe '^Alarm' -e '^Timer' ; then
     # here, append new entry to output file
   fi
 else
-  echo "this is new"
-  proto_new_end_time=$(echo "$first_output" | grep -oP "^[^\s]*")
-  proto_new_message=$(echo "$first_output" | grep -oP "(?<= ).*")
-  if echo "$first_output" | grep -Pq '^\+(\d\d:){0,2}\d\d(?!:|\d)'; then
-    new_type="timer"
-  elif echo "$first_output" | grep -Pq '^(\d\d:){0,2}\d\d(?!:|\d)'; then
-    new_type="alarm"
+  if echo "$first_output" | grep -Pq '^\+?(\d\d:){0,2}\d\d(?!:|\d)'; then
+# this must begin with 
+#  echo "this is a new entry"
+    proto_new_end_time=$(echo "$first_output" | grep -oP "^[^\s]*")
+    proto_new_message=$(echo "$first_output" | grep -oP "(?<= ).*")
+    if echo "$first_output" | grep -Pq '^\+(\d\d:){0,2}\d\d(?!:|\d)'; then
+      new_type="timer"
+    elif echo "$first_output" | grep -Pq '^(\d\d:){0,2}\d\d(?!:|\d)'; then
+      new_type="alarm"
+    fi
+  else
+    exit 1
   fi
 fi
 
 echo "$timer_id" |
-#sed "$corresponding_line_number!d;q" "$csv_file" |
 while IFS="," read -r end_time type message
 do
-  echo "timer_id is $end_time,$type,$message"
   if [ -z "$proto_new_end_time" ]; then
     new_end_time="$end_time"
   elif echo "$proto_new_end_time" | grep -Pq "^\+.+"; then
-    echo "branch 1"
-    echo "proto_new_end_time is $proto_new_end_time"
-    echo "truncated version of proto_new_end_time is $(echo "$proto_new_end_time" | tr -d "+")"
-    echo "flex-to-sec version of "
-    new_end_time="$(expr "$end_time" + "$(flex-to-sec "$(echo "$proto_new_end_time" | tr -d "+")")")"
+    if [ $end_time ]; then
+      new_end_time="$(expr "$end_time" + "$(flex-to-sec "$(echo "$proto_new_end_time" | tr -d "+")")")"
+    else
+      new_end_time="$(expr "$current_unix_time" + "$(flex-to-sec "$(echo "$proto_new_end_time" | tr -d "+")")")"
+    fi
   else
-    echo "branch 2"
     new_end_time="$(expr "$today_unix_time" + "$(flex-to-sec "$proto_new_end_time")")"
     if [ "$new_end_time" -le "$current_unix_time" ]; then
       new_end_time="$(expr "$new_end_time" + 86400)"
@@ -99,26 +101,21 @@ do
   if [ -z "$new_type" ]; then
     new_type=$type
   fi
-  echo "output   is $new_end_time,$new_type,$new_message"
-#  sed "$corresponding_line_number""s/.*/$new_end_time,$new_type,$new_message" "$csv_file"
-  sort "$csv_file" | sponge "$csv_file"
-done
-#
-#
-#head -n 1 "$csv_file" |
-#while IFS="," read -r end_time type message
-#do
-#  sleep "$(expr "$end_time" - "$current_unix_time")"
-#  echo "$new_end_time,$type,$new_message"
-##  mpv --vid=no "$sound_effect"
-##  dunstify --urgency=CRITICAL "$(echo "$type" | sed 's/.*/\u&/') finished" "$(sec-to-flex "$1")"
-##  sed -i '1d' "$csv_file"
-#done
 
+# write output to file, appropriately substituting or appending line
 # sort the file (by the end time)
 # refresh the timer (to the top alarm in the file: the soonest) upon editing the file
 
-# if the csv file is not empty
+#  echo "output   is $new_end_time,$new_type,$new_message"
+  if [ "$corresponding_line_number" ]; then
+    sed "$corresponding_line_number""s/.*/$new_end_time,$new_type,$new_message" "$csv_file"
+  else
+    echo "$new_end_time,$new_type,$new_message" >> "$csv_file"
+  fi
+  sort "$csv_file" | sponge "$csv_file"
+done
+
+# if the csv file exists and is not empty
 # - wait for the soonest alarm to be finished
 # - if the current time is less than or equal to the end time:
 #   + play a sound
@@ -126,4 +123,20 @@ done
 #   + delete the first line in the csv file
 #   + restart this process
 
-# bonus: put this function in your xinitrc or equivalent
+# TODO: fork this watching process into background and delete the old one if it exists
+# TODO: initiate this watching function in your xinitrc or equivalent
+# TODO: remove all errors
+# TODO: rewrite flex-to-sec and flex-to-sec in POSIX shell
+
+
+while [ -s "$csv_file" ]; do
+  head -n 1 "$csv_file" |
+  while IFS="," read -r end_time type message
+  do
+    sleep "$(expr "$end_time" - "$current_unix_time")"
+#    echo "$new_end_time,$type,$new_message"
+    mpv --vid=no "$sound_effect"
+    dunstify --urgency=CRITICAL "$(echo "$type" | sed 's/.*/\u&/') finished" "$(sec-to-flex "$1")"
+    sed -i '1d' "$csv_file"
+  done
+done
