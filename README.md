@@ -8,12 +8,11 @@ Work in progress
 - Timers stored in $XDG_DATA_HOME/rofi-timers.csv
 - rofi-timers.csv will be in the format:
 
-> \<UNIX timestamp of date created\>,\<UNIX timestamp of date due\>,\<Alarm/Timer\>,"\<message for notification\>"
+> \<UNIX timestamp of date due\>,\<alarm/timer\>,"\<message for notification\>"
 
-- rofi permits entry of alarms in format "((DD )HH(:))MM((:)SS)"
-- rofi permits entry of duration in format "+((DD )HH(:))MM((:)SS)"  
-- rofi displays existing alarms (as "((DD )HH(:))MM((:)SS)") and durations (as countdowns in format ((DD )HH(:))MM((:)SS))
-- the countdowns will be obvious because they will be counting down, refreshing every second
+- rofi permits entry of alarms in format "HH:MM:SS", "HH:MM" or "MM"
+- rofi permits entry of duration of a timer in format "+HH:MM:SS", "+HH:MM" or "+MM"  
+- rofi displays existing alarms as "at \<time\>" and existing timers as "\<time\> left" 
 
 - upon triggering an alarm
     + a sound will be played
@@ -21,7 +20,7 @@ Work in progress
 
 - upon exiting the rofi menu, rofi-timers.csv will be sorted by "UNIX timestamp of date due"
 - after this, a process will be made to wait for the difference between current date and UNIX timestamp of date due, then play the noise and display the notification
-- if this process is completed, the top line in the file is deleted, and a new one is created for the new top one
+- if this process is completed, the top line in the file is deleted, and a new process is created for the next soonest alarm or timer
 - if rofi-timers.csv is empty, no process is created
 
 # Potential additions
