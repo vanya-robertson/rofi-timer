@@ -5,35 +5,42 @@ Work in progress
 
 # Specifications
 
-- Timers stored in $XDG_DATA_HOME/rofi-timers.csv
-- rofi-timers.csv will be in the format:
+## Storage
 
-> \<UNIX timestamp of date due\>,\<alarm/timer\>,"\<message for notification\>"
+Stored in $XDG_DATA_HOME/rofi-timers.csv
+Stored in format: \<UNIX timestamp of date due\>,\<alarm/timer\>,"\<message for notification\>"
 
-- rofi permits entry of alarms in format "HH:MM:SS", "HH:MM" or "MM"
-- rofi permits entry of duration of a timer in format "+HH:MM:SS", "+HH:MM" or "+MM"  
-- rofi displays existing alarms as "at \<time\>" and existing timers as "\<time\> left" 
+## Entry
 
-- upon triggering an alarm
-    + a sound will be played
-    + a notification will be sent with title "\<Alarm/Timer\> complete" "\<message for notification\>"
+New entries must include a timestamp or duration and a description.  
+Modifying existing entries can include either a time, a description, or both.  
+Viable duration formats are "+MM", "+MM:SS" or "+HH:MM:SS".  
+Viable timestamp formats are "HH", "HH:MM" or HH:MM:SS".  
+Timestamps are presumed to be on the day of entry if after the current time, or on the day after if before the current time.  
+For a new entry, entry of a duration makes entry a timer and entry of a timestamp, an alarm.  
+Modification of an existing entry by a duration will append the amount of time specified.  
 
-- upon exiting the rofi menu, rofi-timers.csv will be sorted by "UNIX timestamp of date due"
-- after this, a process will be made to wait for the difference between current date and UNIX timestamp of date due, then play the noise and display the notification
-- if this process is completed, the top line in the file is deleted, and a new process is created for the next soonest alarm or timer
-- if rofi-timers.csv is empty, no process is created
+## Watching and waiting
 
-# Potential additions
+Upon exiting the modification script with code 0, the background process is spawned.  
+If an existing background process exists, it is terminated.  
+If the storage file is empty, the process exits.  
+This background process waits for the amount of time between the current UNIX time and the UNIX time of the soonest alarm.  
+Once complete:  
+A sound is played.  
+A notification is sent.  
+The soonest item is deleted.
+The script spawns a new instance of itself, then terminates.  
 
-- create line for xinitrc to start counting down top line.
+# Suggested customisations
+
+Start the background script from xinitrc to enable automatic resume after power off.  
 
 # Dependencies
 
 rofi (rofi)  
 date (coreutils)  
-sponge (moreutils)
-mpv (mpv)  
-dunstify (dunst)  
+sponge (moreutils)  
+notify-send (libnotify)  
 dunst (dunst)  
-sec-to-flex (personal python script)  
-flex-to-sec (personal python script)  
+ffplay (ffmpeg)  
