@@ -2,7 +2,7 @@
 
 # program to make, edit and delete alarms via rofi.
 
-csv_file="/home/jcrtf/projects/rofi-timers/test/file.temp" # ensure this variable is the same as in rofi-timer-bg.sh
+csv_file="$XDG_DATA_HOME/rofi-timers.csv" # ensure this variable is the same as in rofi-timer-bg.sh
 today_unix_time="$(date -d "$(date +%Y-%m-%dT00:00:00Z)" +%s)"
 
 #debug() {
@@ -37,6 +37,7 @@ input_error() {
 delete_item() {
     sed -i "$line_number d" "$csv_file" &&
     notify-send "$(echo "$time_type" | sed 's/.*/\u&/') deleted" &&
+    sh /home/jcrtf/projects/rofi-timer/rofi-timer-bg.sh &
     exit 0
 }
 
@@ -115,7 +116,8 @@ do
 done < "$csv_file"
 
 # Select a line from the list of existing entries, or enter a new alarm or timer
-first_output="$(echo "$menu_string" | rofi -dmenu)"
+first_output="$(echo "$menu_string" | rofi -dmenu -l 5)"
+[ "$?" = 1 ] && exit 0
 
 # Check novelty: Values may be either new, or existing
 echo "$first_output" | grep -qe '^Alarm' -e '^Timer' && novelty="existing"
@@ -176,10 +178,12 @@ else
 fi
 
 [ -n "$new_end_time" ] && end_time="$new_end_time"
-[ -n "$new_message" ] && message="\"$new_message\""
+[ -n "$new_message" ] && message="\"$(echo "$new_message" | sed 's/"/\\"/g')\""
 
 # Output
 [ -n "$line_number" ] &&
   sed -i "$line_number s/.*/$end_time,$time_type,$message/" "$csv_file" ||
   echo "$end_time,$time_type,$message" >> "$csv_file"
 sort "$csv_file" | sponge "$csv_file"
+
+sh /home/jcrtf/projects/rofi-timer/rofi-timer-bg.sh &

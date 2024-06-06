@@ -1,14 +1,13 @@
-# rofi-timers
+# rofi-timer
 
-Shell script to create and control multiple timers from rofi  
-Work in progress  
+A shell script to create and control multiple timers from rofi.  
 
 # Specifications
 
 ## Storage
 
-Stored in $XDG_DATA_HOME/rofi-timers.csv
-Stored in format: \<UNIX timestamp of date due\>,\<alarm/timer\>,"\<message for notification\>"
+Stored in `$XDG_DATA_HOME/rofi-timers.csv`
+Stored in format: `\<UNIX timestamp of date due\>,\<alarm/timer\>,"\<message for notification\>"`
 
 ## Entry
 
@@ -41,6 +40,6 @@ Start the background script from xinitrc to enable automatic resume after power 
 rofi (rofi)  
 date (coreutils)  
 sponge (moreutils)  
+mpv (mpv)
 notify-send (libnotify)  
 dunst (dunst)  
-ffplay (ffmpeg)  
