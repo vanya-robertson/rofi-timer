@@ -2,7 +2,7 @@
 
 # program to make, edit and delete alarms via rofi.
 
-csv_file="$XDG_DATA_HOME/rofi-timers.csv" # ensure this variable is the same as in rofi-timer-bg.sh
+csv_file="$XDG_DATA_HOME/rofi-timer.csv" # ensure this variable is the same as in rofi-timer-bg.sh
 today_unix_time="$(date -d "$(date +%Y-%m-%dT00:00:00Z)" +%s)"
 
 #debug() {
@@ -37,9 +37,11 @@ input_error() {
 delete_item() {
     sed -i "$line_number d" "$csv_file" &&
     notify-send "$(echo "$time_type" | sed 's/.*/\u&/') deleted" &&
-    sh /home/jcrtf/projects/rofi-timer/rofi-timer-bg.sh &
+    rofi-timer-bg.sh &
     exit 0
 }
+
+[ -e "$csv_file" ] || touch "$csv_file"
 
 convert_duration_to_seconds() {
   hours=0
@@ -186,4 +188,4 @@ fi
   echo "$end_time,$time_type,$message" >> "$csv_file"
 sort "$csv_file" | sponge "$csv_file"
 
-sh /home/jcrtf/projects/rofi-timer/rofi-timer-bg.sh &
+rofi-timer-bg.sh &
