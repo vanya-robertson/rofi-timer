@@ -6,8 +6,8 @@ A shell script to create and control multiple timers from rofi.
 
 ## Storage
 
-Stored in `$XDG_DATA_HOME/rofi-timers.csv`
-Stored in format: `\<UNIX timestamp of date due\>,\<alarm/timer\>,"\<message for notification\>"`
+Stored in `$XDG_DATA_HOME/rofi-timers.csv`  
+Stored in format: `\<UNIX timestamp of date due\>,\<alarm/timer\>,"\<message for notification\>"`  
 
 ## Entry
 
