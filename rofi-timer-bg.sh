@@ -22,5 +22,5 @@ rm -f "$lockfile"
 notify-send --urgency=CRITICAL "$(echo "$form" | sed 's/.*/\u&/') finished" "$message"
 mpv --vid=no "$sound_effect" > /dev/null 2>&1
 #ffplay -nodisp -autoexit "$sound_effect" > /dev/null 2>&1
-nohup rofi-timer-bg.sh &
+nohup rofi-timer-bg.sh > /dev/null &
 sed -i '1d' "$csv_file"
